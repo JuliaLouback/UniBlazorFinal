@@ -1,0 +1,28 @@
+﻿@page "/fornecedores/editar/{id:int}"
+@inject IFornecedorRepository fornecedorRepository
+@inject ITelefoneRepository telefoneRepository
+@inject IEnderecoRepository enderecoRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Editar Fornecedor</h3>
+
+<FormFornecedor Fornecedor="@fornecedor" ButtonText="Editar" OnValidSubmit="@EditFornecedor"></FormFornecedor>
+
+@code {
+    Fornecedor fornecedor = new Fornecedor();
+
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        fornecedor = await fornecedorRepository.GetFornecedor(id);
+    }
+
+    async Task EditFornecedor()
+    {
+        await fornecedorRepository.UpdateFornecedor(fornecedor);
+        await telefoneRepository.UpdateTelefone(fornecedor.Telefone);
+        await enderecoRepository.UpdateEndereco(fornecedor.Endereco);
+        navigation.NavigateTo("/fornecedores");
+    }
+}

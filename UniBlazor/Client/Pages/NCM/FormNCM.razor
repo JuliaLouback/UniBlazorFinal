@@ -1,0 +1,39 @@
+﻿@inject IJSRuntime JSRuntime
+<div class="row">
+    <div class="col-md-10 col-sm-12">
+        <EditForm Model="@ncm" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="row">
+
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Código</label>
+                        <input type="number" @bind="@ncm.Codigo" class="form-control"/>
+                        <ValidationMessage For="@(() => ncm.Codigo)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <InputText @bind-Value="@ncm.Descricao" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => ncm.Descricao)"></ValidationMessage>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success ml-3">@ButtonText</button>
+                <a href="/ncm" class="btn btn-primary ml-2">Voltar</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code{
+    [Parameter] public NCM ncm { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+}
+
+

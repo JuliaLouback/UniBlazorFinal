@@ -1,0 +1,89 @@
+﻿@inject HttpClient http
+<div class="row mt-2">
+    <div class="col-md-6 col-sm-12">
+        <h4 class="text-primary">Adicionar produtos</h4>
+    </div>
+</div>
+<EditForm Model="@AddProdutoView" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <ValidationSummary></ValidationSummary>
+    <div class="row">
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Produtos</label>
+                <select @bind="@AddProdutoView.ProductId" @onblur="Recarregar" class="form-control">
+                    <option value=""></option>
+                    @if (Produtos != null) {
+
+                        foreach (var produto in Produtos)
+                        {
+                            <option value="@produto.Id_produto">@produto.NomeResumido</option>
+                        }
+                    }
+                </select>
+                <ValidationMessage For="@(() => AddProdutoView.ProductId)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-12">
+            <div class="form-group">
+                <label>Quantidade</label>
+                <InputNumber @bind-Value="@AddProdutoView.Quantity" max="@quantidadeMaxima" class="form-control"></InputNumber>
+                <ValidationMessage For="@(() => AddProdutoView.Quantity)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Cotação</label>
+                <select @bind="@AddProdutoView.Id_historico" class="form-control">
+                    <option value=""></option>
+                    @foreach (var historico in Historicos)
+                    {
+                        <option value="@historico.Id_historico">@historico.FullName</option>
+                    }
+                </select>
+                <ValidationMessage For="@(() => AddProdutoView.Quantity)"></ValidationMessage>
+            </div>
+        </div>
+
+        <div class="col-md-2 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-success ml-3 mt-4">@ButtonText</button>
+        </div>
+    </div>
+</EditForm>
+
+
+@code{
+    [Parameter] public AddProdutoView AddProdutoView { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    private long quantidadeMaxima = 0;
+
+    List<Produto> Produtos = new List<Produto>();
+
+    List<Historico> Historicos = new List<Historico>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        Produtos = await http.GetFromJsonAsync<List<Produto>>("api/produto");
+        Produtos = Produtos.Where(x => x.Estoque_atual > 0).ToList();
+    }
+
+    private async Task Recarregar()
+    {
+        if (AddProdutoView.ProductId != 0)
+        {
+            var prod = await http.GetFromJsonAsync<Produto>($"api/produto/{AddProdutoView.ProductId}");
+            quantidadeMaxima = prod.Estoque_atual;
+            Historicos = await http.GetFromJsonAsync<List<Historico>>("api/historico");
+            Historicos = Historicos.Where(x => x.Produto_Id_produto == AddProdutoView.ProductId).OrderByDescending(x => x.Id_historico).ToList();
+        }
+    }
+}

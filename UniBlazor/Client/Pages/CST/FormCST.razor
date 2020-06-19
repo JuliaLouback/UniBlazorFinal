@@ -1,0 +1,38 @@
+﻿@inject IJSRuntime JSRuntime
+<div class="row">
+    <div class="col-md-10 col-sm-12">
+        <EditForm Model="@cst" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="row">
+
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Código</label>
+                        <InputText @bind-Value="@cst.Codigo" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => cst.Codigo)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <InputText @bind-Value="@cst.Descricao" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => cst.Descricao)"></ValidationMessage>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success ml-3">@ButtonText</button>
+                <a href="/Cst" class="btn btn-primary ml-2">Voltar</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code{
+    [Parameter] public CST cst { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+}
+

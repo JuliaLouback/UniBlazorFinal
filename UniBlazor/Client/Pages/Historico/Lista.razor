@@ -1,0 +1,120 @@
+﻿@page "/historico"
+@inject IHistoricoRepository historicoRepository
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary mb-4">Lista de Histórico de Produtos</h3>
+
+<EditForm Model="@filterProduto" OnValidSubmit="@Pesquisa">
+    <div class="row apagar">
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Nome</label>
+                <InputText @bind-Value="@filterProduto.Nome" class="form-control"></InputText>
+                <ValidationMessage For="@(() => filterProduto.Nome)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Data Inicial</label>
+                <InputDate @bind-Value="@filterProduto.DataI" class="form-control"></InputDate>
+                <ValidationMessage For="@(() => filterProduto.DataI)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Data Final</label>
+                <InputDate @bind-Value="@filterProduto.DataF" class="form-control"></InputDate>
+                <ValidationMessage For="@(() => filterProduto.DataF)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-outline-secondary mt-4">Pesquisar</button>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="button" class="btn btn-outline-primary mt-4" @onclick="Imprimir">Imprimir</button>
+        </div>
+    </div>
+</EditForm>
+
+<div>
+    @if (historicos == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (historicos.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div>
+    }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Data Início
+                    </th>
+                    <th>
+                        Data Final
+                    </th>
+                    <th>
+                        Produto
+                    </th>
+                    <th>
+                        Valor
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in historicos)
+                {
+                    <tr>
+                        <td>
+                            @item.Data_inicio
+                        </td>
+                        <td>
+                            @item.Data_final
+                        </td>
+                        <td>
+                            @item.Produto.NomeResumido
+                        </td>
+                        <td>
+                            R$ @item.Valor
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<Historico> historicos;
+    FilterProduto filterProduto = new FilterProduto();
+    ElementReference MyAlert;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        historicos = await historicoRepository.GetHistorico();
+    }
+
+    private async Task Pesquisa()
+    {
+       
+        historicos = await historicoRepository.GetHistoricoFilter(filterProduto);
+    }
+
+    private async Task Imprimir()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorImprimir.setImprimir");
+
+    }
+}
+

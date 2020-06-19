@@ -1,0 +1,57 @@
+﻿@page "/vendas/adicionar"
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject IJSRuntime jsRuntime
+
+<h3 class="text-primary mb-4">Adicionar Venda</h3>
+
+<FormVenda Venda="@vendaProduto" ButtonText="Adicionar" OnValidSubmit="@AddVenda"></FormVenda>
+
+@code {
+    Venda vendaProduto = new Venda();
+
+    async Task AddVenda()
+    {
+        DateTime localDate = DateTime.Now;
+
+        Venda venda = new Venda();
+
+        venda.Cliente_Cpf = vendaProduto.Cliente_Cpf;
+        venda.Data_venda = localDate;
+        venda.Funcionario_Cpf = vendaProduto.Funcionario_Cpf;
+
+        decimal total = 0;
+        foreach (VendaProduto vendaProduto1 in vendaProduto.VendaProdutos)
+        {
+            total = decimal.Add(total, vendaProduto1.Valor);
+        }
+        venda.Valor_total = total;
+
+        var response = await http.PostAsJsonAsync("api/venda", venda);
+        var result = await response.Content.ReadAsStringAsync();
+
+        var vendinha = await http.GetFromJsonAsync<Venda>($"api/venda/{Convert.ToInt32(result)}");
+
+        List<VendaProduto> lista = new List<VendaProduto>();
+        List<Produto> listaProd = new List<Produto>();
+
+        foreach (VendaProduto vendaProduto2 in vendaProduto.VendaProdutos)
+        {
+            VendaProduto vendaP  = new VendaProduto
+            {
+                Produto_Id_produto = vendaProduto2.Produto_Id_produto,
+                Quantidade = vendaProduto2.Quantidade,
+                Valor = vendaProduto2.Valor,
+                Valor_unitario = vendaProduto2.Valor_unitario,
+                Venda_Id_venda = vendinha.Id_venda
+            };
+
+            var produto = await http.GetFromJsonAsync<Produto>($"api/produto/{vendaProduto2.Produto_Id_produto}");
+            produto.Estoque_atual = produto.Estoque_atual - vendaProduto2.Quantidade;
+            await http.PostAsJsonAsync("api/vendaProduto", vendaP);
+            await http.PutAsJsonAsync("api/produto", produto);
+        }
+
+        navigation.NavigateTo("/vendas");
+    }
+}

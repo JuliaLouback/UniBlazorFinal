@@ -1,0 +1,90 @@
+﻿@page "/vendas"
+@inject HttpClient http
+
+<h3 class="text-primary mb-4">Lista de Vendas</h3>
+
+<div>
+    <a href="/vendas/adicionar" class="btn btn-outline-success mb-4">Adicionar</a>
+</div>
+
+<div>
+    @if (venda == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (venda.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div> }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Cliente
+                    </th>
+                    <th>
+                        Funcionário
+                    </th>
+                    <th>
+                        Data da Venda
+                    </th>
+                    <th>
+                        Valor
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in venda)
+                {
+                <tr>
+                    <td>
+                        @item.Cliente.Nome
+                    </td>
+                    <td>
+                        @item.Funcionario.Nome
+                    </td>
+                    <td>
+                        @item.Data_venda.ToShortDateString()
+                    </td>
+                    <td>
+                        R$ @item.Valor_total
+                    </td>
+                    <td>
+                        <a href="/vendas/editar/@item.Id_venda" class="btn btn-warning">Editar</a>
+                        <a href="/vendas/detalhes/@item.Id_venda" class="btn btn-info">Detalhes</a>
+                        <button class="btn btn-danger" @onclick="@(() => ExcluirVenda(item.Id_venda))">Excluir</button>
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<Venda> venda;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        venda = await http.GetFromJsonAsync<List<Venda>>("api/venda");
+    }
+
+    private async Task ExcluirVenda(int id)
+    {
+        await http.DeleteAsync($"api/venda/{id}");
+        await LoadData();
+    }
+
+}
+

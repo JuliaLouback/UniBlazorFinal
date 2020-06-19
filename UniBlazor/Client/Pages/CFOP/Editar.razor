@@ -1,0 +1,23 @@
+﻿@page "/cfop/editar/{id}"
+@inject HttpClient http
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Editar CFOP</h3>
+
+<FormCFOP Cfop="@cfop" ButtonText="Editar" OnValidSubmit="@EditCfop"></FormCFOP>
+
+@code {
+    CFOP cfop = new CFOP();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cfop = await http.GetFromJsonAsync<CFOP>($"api/cfop/{id}");
+    }
+
+    async Task EditCfop()
+    {
+        await http.PutAsJsonAsync("api/cfop", cfop);
+        navigation.NavigateTo("/cfop");
+    }
+}

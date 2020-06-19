@@ -1,0 +1,41 @@
+﻿@page "/clientes/adicionar"
+@inject IClienteRepository clienteRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Adicionar Cliente</h3>
+
+<FormCliente Cliente="@cliente" ButtonText="Adicionar" OnValidSubmit="@AddClientes"></FormCliente>
+
+@code {
+    Cliente cliente = new Cliente();
+
+    async Task AddClientes()
+    {
+        Telefone telefone = new Telefone();
+        telefone.Telefones = cliente.Telefone.Telefones;
+
+        Endereco endereco = new Endereco();
+        endereco.Cep = cliente.Endereco.Cep;
+        endereco.Numero = cliente.Endereco.Numero;
+        endereco.Rua = cliente.Endereco.Rua;
+        endereco.Bairro = cliente.Endereco.Bairro;
+        endereco.Cidade = cliente.Endereco.Cidade;
+        endereco.Estado = cliente.Endereco.Estado;
+
+        cliente.Telefone_Id_telefone = telefone.Id_telefone;
+        cliente.Telefone = telefone;
+
+        cliente.Endereco_Id_Endereco = endereco.Id_endereco;
+        cliente.Endereco = endereco;
+
+        try
+        {
+            await clienteRepository.CreateCliente(cliente);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+        navigation.NavigateTo("/clientes");
+    }
+}

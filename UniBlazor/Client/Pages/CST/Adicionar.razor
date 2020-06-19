@@ -1,0 +1,24 @@
+﻿@page "/cst/adicionar"
+@inject ICstRepository cstRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Adicionar CST</h3>
+
+<FormCST Cst="@cst" ButtonText="Adicionar" OnValidSubmit="@AddCst"></FormCST>
+
+@code {
+    CST cst = new CST();
+
+    async Task AddCst()
+    {
+        try
+        {
+            await cstRepository.CreateCst(cst);
+        }
+        catch(Exception ex)
+        {
+
+        }
+        navigation.NavigateTo("/cst");
+    }
+}

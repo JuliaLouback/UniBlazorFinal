@@ -1,0 +1,80 @@
+﻿@page "/funcionarios/editar/{id}"
+@inject IFuncionarioRepository funcionarioRepository
+@inject IHistoricoSalarioRepository historicoSalarioRepository
+@inject IHistoricoStatusRepository historicoStatusRepository
+@inject ITelefoneRepository telefoneRepository
+@inject IEnderecoRepository enderecoRepository
+@inject NavigationManager navigation
+@inject IJSRuntime jsRuntime
+
+<h3 class="text-primary mb-4">Editar Funcionário</h3>
+
+<FormFuncionario Funcionario="@funcionario" ButtonText="Editar" OnValidSubmit="@EditFuncionario"></FormFuncionario>
+
+@code {
+    Funcionario funcionario = new Funcionario();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        funcionario = await funcionarioRepository.GetFuncionario(id);
+    }
+
+    protected async Task EditFuncionario()
+    {
+        try
+        {
+            await funcionarioRepository.UpdateFuncionario(funcionario);
+            await telefoneRepository.UpdateTelefone(funcionario.Telefone);
+            await enderecoRepository.UpdateEndereco(funcionario.Endereco);
+
+
+            HistoricoStatus historico = await historicoStatusRepository.GetHistoricoStatus(id);
+            HistoricoSalario historicoS = await historicoSalarioRepository.GetHistoricoSalario(id);
+
+
+            if (historico.Status != funcionario.Status)
+            {
+
+                DateTime localDate = DateTime.Now;
+
+                HistoricoStatus historicoStatus = new HistoricoStatus();
+                historicoStatus.Data_inicio = localDate;
+                historicoStatus.Funcionario_Cpf = funcionario.Cpf;
+                historicoStatus.Status = funcionario.Status;
+
+                historico.Data_final = localDate;
+
+                await historicoStatusRepository.UpdateHistoricoStatus(historico);
+                await historicoStatusRepository.CreateHistoricoStatus(historicoStatus);
+
+            }
+
+            if (historicoS.Salario != funcionario.Salario || historicoS.Cargo != funcionario.Cargo)
+            {
+                DateTime localDate = DateTime.Now;
+
+                HistoricoSalario historicoSalario = new HistoricoSalario();
+                historicoSalario.Data_inicio = localDate;
+                historicoSalario.Funcionario_Cpf = funcionario.Cpf;
+                historicoSalario.Salario = funcionario.Salario;
+                historicoSalario.Cargo = funcionario.Cargo;
+
+                historicoS.Data_final = localDate;
+
+                await historicoSalarioRepository.UpdateHistoricoSalario(historicoS);
+
+                await historicoSalarioRepository.CreateHistoricoSalario(historicoSalario);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        navigation.NavigateTo("/funcionarios");
+
+
+
+    }
+}

@@ -1,0 +1,80 @@
+﻿@page "/produtos/editar/{id:int}"
+@inject IProdutoRepository produtoRepository
+@inject IHistoricoRepository historicoRepository
+@inject NavigationManager navigation
+@inject IJSRuntime jsRuntime
+
+<h3 class="text-primary mb-4">Editar Produtos</h3>
+
+<FormProduto Produto="@produto" ButtonText="Editar" OnValidSubmit="@EditProduto"></FormProduto>
+
+@code {
+    Produto produto = new Produto();
+
+
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        produto = await produtoRepository.GetProduto(id);
+
+    }
+
+    async Task EditProduto()
+    {
+        await jsRuntime.InvokeAsync<string>("console.log", produto.CST_Codigo);
+
+        try
+        {
+            await produtoRepository.UpdateProduto(produto);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        try
+        {
+
+            Historico historicoP = await historicoRepository.GetHistorico(id);
+
+
+            if (historicoP.Valor != produto.Valor_unitario)
+            {
+
+                DateTime localDate = DateTime.Now;
+
+                Historico historico = new Historico();
+                historico.Data_inicio = localDate;
+                historico.Produto_Id_produto = produto.Id_produto;
+                historico.Valor = produto.Valor_unitario;
+
+                historicoP.Data_final = localDate;
+
+                try
+                {
+                    await historicoRepository.CreateHistorico(historico);
+                } catch(Exception ex)
+                {
+
+                }
+
+                try
+                {
+                    await historicoRepository.UpdateHistorico(historicoP);
+                } catch(Exception ex)
+                {
+
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        navigation.NavigateTo("/produtos");
+    }
+}
+

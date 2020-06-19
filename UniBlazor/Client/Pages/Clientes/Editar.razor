@@ -1,0 +1,27 @@
+﻿@page "/clientes/editar/{id}"
+@inject IClienteRepository clienteRepository
+@inject ITelefoneRepository telefoneRepository
+@inject IEnderecoRepository enderecoRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Editar Cliente</h3>
+
+<FormCliente Cliente="@cliente" ButtonText="Editar" OnValidSubmit="@EditCliente"></FormCliente>
+
+@code {
+    Cliente cliente = new Cliente();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cliente = await clienteRepository.GetCliente(id);
+    }
+
+    async Task EditCliente()
+    {
+        await clienteRepository.UpdateCliente(cliente);
+        await telefoneRepository.UpdateTelefone(cliente.Telefone);
+        await enderecoRepository.UpdateEndereco(cliente.Endereco);
+        navigation.NavigateTo("/clientes");
+    }
+}

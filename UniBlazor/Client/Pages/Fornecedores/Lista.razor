@@ -1,0 +1,149 @@
+﻿@page "/fornecedores"
+@inject IFornecedorRepository fornecedorRepository
+@inject ITelefoneRepository telefoneRepository
+@inject IEnderecoRepository enderecoRepository
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary mb-4">Lista de Fornecedores</h3>
+
+<div>
+    <a href="/fornecedores/adicionar" class="btn btn-outline-success mb-4">Adicionar</a>
+</div>
+<EditForm Model="@filterFornecedor" OnValidSubmit="@Pesquisa">
+    <div class="row apagar">
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Nome</label>
+                <InputText @bind-Value="@filterFornecedor.Nome_empresa" class="form-control"></InputText>
+                <ValidationMessage For="@(() => filterFornecedor.Nome_empresa)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Cidade</label>
+                <InputText @bind-Value="@filterFornecedor.Cidade" class="form-control"></InputText>
+                <ValidationMessage For="@(() => filterFornecedor.Cidade)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-outline-secondary mt-4">Pesquisar</button>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="button" class="btn btn-outline-primary mt-4" @onclick="Imprimir">Imprimir</button>
+        </div>
+    </div>
+</EditForm>
+
+<div class="alert alert-danger alert-dismissible" role="alert" style="display:none" @ref="MyAlert">
+    O fornecedor <strong>não</strong> pode ser excluído pois esta vinculado a um ou mais produtos!
+</div>
+
+<div>
+    @if (fornecedores == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div>
+    }
+    else if (fornecedores.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div>
+    }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Nome
+                    </th>
+                    <th>
+                        E-mail
+                    </th>
+                    <th>
+                        CNPJ
+                    </th>
+                    <th>
+                        Inscrição Estadual
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in fornecedores)
+                {
+                    <tr>
+                        <td>
+                            @item.NomeResumido
+                        </td>
+                        <td>
+                            @item.Email
+                        </td>
+                        <td>
+                            @item.Cnpj
+                        </td>
+                        <td>
+                            @item.Inscricao_estadual
+                        </td>
+                        <td class="apagar">
+                            <a href="/fornecedores/editar/@item.Telefone_Id_telefone" class="btn btn-warning">Editar</a>
+                            <a href="/fornecedores/detalhes/@item.Telefone_Id_telefone" class="btn btn-info">Detalhes</a>
+                            <button class="btn btn-danger" @onclick="@(() => ExcluirFornecedor(item.Telefone_Id_telefone))">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    List<Fornecedor> fornecedores;
+    FilterFornecedor filterFornecedor = new FilterFornecedor();
+    ElementReference MyAlert;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        fornecedores = await fornecedorRepository.GetFornecedor();
+    }
+
+    private async Task ExcluirFornecedor(int id)
+    {
+        var fornecedor = await fornecedorRepository.GetFornecedor(id);
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisaoB", MyAlert);
+
+            //await fornecedorRepository.DeleteFornecedor(id);
+            await telefoneRepository.DeleteTelefone(fornecedor.Telefone_Id_telefone);
+            await enderecoRepository.DeleteEndereco(fornecedor.Endereco_Id_Endereco);
+        }
+        catch (Exception e)
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisao", MyAlert);
+
+            Console.WriteLine(e.Message);
+        }
+
+        await LoadData();
+    }
+    private async Task Pesquisa()
+    {
+        fornecedores = await fornecedorRepository.GetFornecedorFilter(filterFornecedor);
+    }
+    private async Task Imprimir()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorImprimir.setImprimir");
+
+    }
+}

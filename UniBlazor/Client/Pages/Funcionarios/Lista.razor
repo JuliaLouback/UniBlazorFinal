@@ -1,0 +1,156 @@
+﻿@page "/funcionarios"
+@inject IFuncionarioRepository funcionarioRepository
+@inject ITelefoneRepository telefoneRepository
+@inject IEnderecoRepository enderecoRepository
+@inject IHistoricoSalarioRepository historicoSalarioRepository
+@inject IHistoricoStatusRepository historicoStatusRepository
+@inject IJSRuntime JSRuntime
+
+
+<h3 class="text-primary mb-4">Lista de Funcionários</h3>
+
+<div>
+    <a href="/funcionarios/adicionar" class="btn btn-outline-success mb-4">Adicionar</a>
+</div>
+<EditForm Model="@filterFuncionario" OnValidSubmit="@Pesquisa">
+    <div class="row apagar">
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Nome</label>
+                <InputText @bind-Value="@filterFuncionario.Nome" class="form-control"></InputText>
+                <ValidationMessage For="@(() => filterFuncionario.Nome)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>CPF</label>
+                <InputText @bind-Value="@filterFuncionario.Cpf" class="form-control" id="cpf"></InputText>
+                <ValidationMessage For="@(() => filterFuncionario.Cpf)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-outline-secondary mt-4">Pesquisar</button>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="button" class="btn btn-outline-primary mt-4" @onclick="Imprimir">Imprimir</button>
+        </div>
+    </div>
+</EditForm>
+
+<div class="alert alert-danger alert-dismissible" role="alert" style="display:none" @ref="MyAlert">
+    O funcionário <strong>não</strong> pode ser excluído pois esta vinculado a uma ou mais Vendas e/ou Cotações!
+</div>
+
+<div>
+    @if (funcionarios == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (funcionarios.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div> }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Nome
+                    </th>
+                    <th>
+                        E-mail
+                    </th>
+                    <th>
+                        CPF
+                    </th>
+                    <th>
+                        Cargo
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in funcionarios)
+                {
+                    <tr>
+                        <td>
+                            @item.Nome
+                        </td>
+                        <td>
+                            @item.Email
+                        </td>
+                        <td>
+                            @item.Cpf
+                        </td>
+                        <td>
+                            @item.Cargo
+                        </td>
+
+                        <td class="apagar">
+                            <a href="/funcionarios/editar/@item.Cpf" class="btn btn-warning">Editar</a>
+                            <a href="/funcionarios/detalhes/@item.Cpf" class="btn btn-info">Detalhes</a>
+                            <button class="btn btn-danger" @onclick="@(() => ExcluirFuncionario(item.Cpf))">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<Funcionario> funcionarios;
+    FilterFuncionario filterFuncionario = new FilterFuncionario();
+    ElementReference MyAlert;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        funcionarios = await funcionarioRepository.GetFuncionario();
+    }
+
+    private async Task ExcluirFuncionario(string id)
+    {
+        var funcionario = await funcionarioRepository.GetFuncionario(id);
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisaoB", MyAlert);
+
+
+            await historicoSalarioRepository.DeleteHistoricoSalario(funcionario.Cpf);
+            await historicoStatusRepository.DeleteHistoricoStatus(funcionario.Cpf);
+            await telefoneRepository.DeleteTelefone(funcionario.Telefone_Id_telefone);
+            await enderecoRepository.DeleteEndereco(funcionario.Endereco_Id_endereco);
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisao", MyAlert);
+
+        }
+    }
+    private async Task Pesquisa()
+    {
+        funcionarios = await funcionarioRepository.GetFuncionarioFilter(filterFuncionario);
+    }
+
+    private async Task Imprimir()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorImprimir.setImprimir");
+
+    }
+}
+
+
+

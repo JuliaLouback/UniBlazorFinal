@@ -1,0 +1,249 @@
+﻿@inject HttpClient http
+@inject IJSRuntime JSRuntime
+<div class="row pb-5">
+    <div class="col-md-10 col-sm-12">
+        <EditForm Model="@Produto" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="row">
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Código</label>
+                        <InputNumber @bind-Value="@Produto.Id_produto" class="form-control"></InputNumber>
+                        <ValidationMessage For="@(() => Produto.Id_produto)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <InputText @bind-Value="@Produto.Nome" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => Produto.Nome)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Valor Unitário</label>
+                        <input type="text" @bind="@Produto.Valor_unitario" class="form-control money"/>
+                        <ValidationMessage For="@(() => Produto.Valor_unitario)"></ValidationMessage>
+                    </div>
+
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Unidade de Medida</label>
+                        <InputSelect @bind-Value="@Produto.Unidade_medida" class="form-control">
+                            <option value=""></option>
+                            <option value="Bloco">Bloco</option>
+                            <option value="Caixa">Caixa</option>
+                            <option value="Galão">Galão</option>
+                            <option value="Gramas">Gramas</option>
+                            <option value="Quilograma">Quilograma</option>
+                            <option value="Litro">Litro</option>
+                            <option value="Metro">Metro</option>
+                            <option value="Pacote">Pacote</option>
+                            <option value="Peça">Peça</option>
+                            <option value="Unidade">Unidade</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => Produto.Unidade_medida)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Estoque Minímo</label>
+                        <InputNumber @bind-Value="@Produto.Estoque_minimo" class="form-control"></InputNumber>
+                        <ValidationMessage For="@(() => Produto.Estoque_minimo)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Estoque Máximo</label>
+                        <InputNumber @bind-Value="@Produto.Estoque_maximo" class="form-control"></InputNumber>
+                        <ValidationMessage For="@(() => Produto.Estoque_maximo)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Estoque Atual</label>
+                        <InputNumber @bind-Value="@Produto.Estoque_atual" max="@Produto.Estoque_maximo" class="form-control"></InputNumber>
+                        <ValidationMessage For="@(() => Produto.Estoque_atual)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Peso Bruto</label>
+                        <input type="text" @bind="@Produto.Peso_bruto" class="form-control money"/>
+                        <ValidationMessage For="@(() => Produto.Peso_bruto)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Peso Líquido</label>
+                        <input type="text" @bind="@Produto.Peso_liquido" class="form-control money">
+                        <ValidationMessage For="@(() => Produto.Peso_liquido)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="form-group">
+                        <label>Descrição</label>
+                        <InputText @bind-Value="@Produto.Descricao" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => Produto.Descricao)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Fornecedores</label>
+                        <select @bind="@Produto.Fornecedor_Cnpj" class="form-control" id="selectFornecedor" @onclick="SelectFornecedor" @ref=MyFornecedor>
+                            @if (Produto.Id_produto == 0)
+                            {
+                                <option value=""></option>
+                            }
+
+                            @foreach (Fornecedor fornecedor in Fornecedores)
+                            {
+                                if (Produto.Fornecedor_Cnpj == @fornecedor.Cnpj)
+                                {
+                                    <option value="@fornecedor.Cnpj" selected="selected">@fornecedor.NomeResumido</option>
+                                }
+                                else
+                                {
+                                    <option value="@fornecedor.Cnpj">@fornecedor.NomeResumido</option>
+                                }
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => @Produto.Fornecedor_Cnpj)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>CFOP</label>
+                        <select @bind="@Produto.CFOP_Codigo" class="form-control" @onclick="SelectCFOP" @ref="MyCFOP">
+                            @if (Produto.Id_produto == 0)
+                            {
+                                <option value=""></option>
+                            }
+
+                            @foreach (CFOP cfop in CFOP)
+                            {
+                                if (Produto.CFOP_Codigo == cfop.Codigo)
+                                {
+                                    <option value="@cfop.Codigo" selected="selected">@cfop.FullName</option>
+                                }
+                                else
+                                {
+                                    <option value="@cfop.Codigo">@cfop.FullName</option>
+                                }
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => @Produto.CFOP_Codigo)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>CST</label>
+                        <select @bind="@Produto.CST_Codigo" class="form-control" @onclick="SelectCST" @ref="MyCST">
+                            @if (Produto.Id_produto == 0)
+                            {
+                                <option value=""></option>
+                            }
+
+                            @foreach (CST cst in CST)
+                            {
+                                if (Produto.CST_Codigo == cst.Codigo)
+                                {
+                                    <option value="@cst.Codigo" selected="selected">@cst.FullName</option>
+                                }
+                                else
+                                {
+                                    <option value="@cst.Codigo">@cst.FullName</option>
+                                }
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => @Produto.CST_Codigo)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label>NCM</label>
+                        <select @bind="@Produto.NCM_Codigo" class="form-control" @onclick="SelectNcm" @ref="MyNCM">
+                            @if (Produto.Id_produto == 0)
+                            {
+                                <option value=""></option>
+                            }
+
+                            @foreach (NCM ncm in NCM)
+                            {
+                                if (Produto.NCM_Codigo == ncm.Codigo)
+                                {
+                                    <option value="@ncm.Codigo" selected="selected">@ncm.FullName</option>
+                                }
+                                else
+                                {
+                                    <option value="@ncm.Codigo">@ncm.FullName</option>
+
+                                }
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => @Produto.NCM_Codigo)"></ValidationMessage>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success ml-3">@ButtonText</button>
+                <a href="/Produtos" class="btn btn-primary ml-2">Voltar</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code{
+    [Parameter] public Produto Produto { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    ElementReference MyFornecedor;
+    ElementReference MyCFOP;
+    ElementReference MyNCM;
+    ElementReference MyCST;
+
+    List<Fornecedor> Fornecedores = new List<Fornecedor>();
+    List<CFOP> CFOP = new List<CFOP>();
+    List<CST> CST = new List<CST>();
+    List<NCM> NCM = new List<NCM>();
+
+    public Fornecedor fornecedor = new Fornecedor();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        Fornecedores = await http.GetFromJsonAsync<List<Fornecedor>>("api/fornecedor");
+        CFOP = await http.GetFromJsonAsync<List<CFOP>>("api/cfop");
+        CST = await http.GetFromJsonAsync<List<CST>>("api/cst");
+        NCM = await http.GetFromJsonAsync<List<NCM>>("api/ncm");
+    }
+
+    protected async void SelectFornecedor()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorUniversity.setSelect", MyFornecedor);
+    }
+
+    protected async void SelectCFOP()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorUniversity.setSelectCfop", MyCFOP);
+    }
+
+    protected async void SelectCST()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorUniversity.setSelectCst", MyCST);
+    }
+
+    protected async void SelectNcm()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorUniversity.setSelectNcm", MyNCM);
+    }
+}
+

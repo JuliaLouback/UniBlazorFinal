@@ -1,0 +1,78 @@
+﻿@page "/vendas/editar/{id:int}"
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject IJSRuntime jsRuntime
+
+<h3 class="text-primary mb-4">Editar Vendas</h3>
+
+<FormVenda Venda="@vendaProduto" ButtonText="Editar" OnValidSubmit="@EditVenda"></FormVenda>
+
+@code {
+
+    Venda vendaProduto = new Venda();
+
+
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        vendaProduto = await http.GetFromJsonAsync<Venda>($"api/venda/{id}");
+
+    }
+
+    async Task EditVenda()
+    {
+        DateTime localDate = DateTime.Now;
+
+        Venda venda = new Venda();
+
+        venda.Id_venda = vendaProduto.Id_venda;
+        venda.Cliente_Cpf = vendaProduto.Cliente_Cpf;
+        venda.Data_venda = localDate;
+        venda.Funcionario_Cpf = vendaProduto.Funcionario_Cpf;
+
+        venda.Data_venda = localDate;
+
+        decimal total = 0;
+        foreach (VendaProduto vendaProduto1 in vendaProduto.VendaProdutos)
+        {
+            total = decimal.Add(total, vendaProduto1.Valor);
+        }
+        venda.Valor_total = total;
+
+        List<VendaProduto> lista = new List<VendaProduto>();
+        List<Produto> listaProd = new List<Produto>();
+
+        List<VendaProduto> listaProdutos = await http.GetFromJsonAsync<List<VendaProduto>>($"api/vendaproduto/{vendaProduto.Id_venda}");
+
+        foreach (VendaProduto vendaProduto2 in vendaProduto.VendaProdutos)
+        {
+            VendaProduto vendaP = new VendaProduto
+            {
+                Produto_Id_produto = vendaProduto2.Produto_Id_produto,
+                Quantidade = vendaProduto2.Quantidade,
+                Valor = vendaProduto2.Valor,
+                Valor_unitario = vendaProduto2.Valor_unitario,
+                Venda_Id_venda = vendaProduto.Id_venda
+            };
+
+            var produto = await http.GetFromJsonAsync<Produto>($"api/produto/{vendaProduto2.Produto_Id_produto}");
+            produto.Estoque_atual = produto.Estoque_atual - vendaProduto2.Quantidade;
+            await http.PostAsJsonAsync("api/vendaProduto", vendaP);
+            await http.PutAsJsonAsync("api/produto", produto);
+        }
+
+        foreach (VendaProduto vendaProduto2 in listaProdutos)
+        {
+            var produto = await http.GetFromJsonAsync<Produto>($"api/produto/{vendaProduto2.Produto_Id_produto}");
+            produto.Estoque_atual = produto.Estoque_atual + vendaProduto2.Quantidade;
+            await http.PutAsJsonAsync("api/produto", produto);
+            await http.DeleteAsync($"api/vendaProduto/{vendaProduto2.Id_vendaProduto}");
+        }
+
+        await http.PutAsJsonAsync("api/venda", venda);
+
+        navigation.NavigateTo("/vendas");
+    }
+}

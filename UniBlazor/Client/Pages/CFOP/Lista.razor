@@ -1,0 +1,78 @@
+﻿@page "/cfop"
+@inject HttpClient http
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary mb-4">Lista de CFOP</h3>
+
+<div>
+    <a href="/cfop/adicionar" class="btn btn-outline-success mb-4">Adicionar</a>
+</div>
+
+<div>
+    @if (cfop == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (cfop.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div> }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Código
+                    </th>
+                    <th>
+                        Descrição
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in cfop)
+                {
+                    <tr>
+                        <td>
+                            @item.Codigo
+                        </td>
+                        <td>
+                            @item.NomeResumido
+                        </td>
+                        <td>
+                            <a href="/cfop/editar/@item.Codigo" class="btn btn-warning">Editar</a>
+                            <a href="/cfop/detalhes/@item.Codigo" class="btn btn-info">Detalhes</a>
+                            <button class="btn btn-danger" @onclick="@(() => ExcluirCfop(item.Codigo))">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<CFOP> cfop;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        cfop = await http.GetFromJsonAsync<List<CFOP>>("api/cfop");
+    }
+
+    private async Task ExcluirCfop(long id)
+    {
+        await http.DeleteAsync($"api/cfop/{id}");
+        await LoadData();
+    }
+
+}

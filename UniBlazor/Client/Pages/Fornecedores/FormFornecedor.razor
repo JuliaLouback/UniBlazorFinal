@@ -1,0 +1,141 @@
+﻿@inject IJSRuntime JSRuntime
+<div class="row">
+    <div class="col-md-10 col-sm-12">
+        <EditForm Model="@Fornecedor" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="row">
+                <div class="col-md-5 col-sm-12">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <InputText @bind-Value="@Fornecedor.Nome_empresa" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => Fornecedor.Nome_empresa)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-5 col-sm-12">
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <InputText @bind-Value="@Fornecedor.Email" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => Fornecedor.Email)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-2 col-sm-12">
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" @bind="@Fornecedor.Telefone.Telefones" id="telefone" class="form-control"/>
+                        <ValidationMessage For="@(() => Fornecedor.Telefone.Telefones)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>CNPJ</label>
+                        <input type="text" @bind="@Fornecedor.Cnpj" id="cnpj" class="form-control"/>
+                        <ValidationMessage For="@(() => Fornecedor.Cnpj)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Inscrição Estadual</label>
+                        <InputText @bind-Value="@Fornecedor.Inscricao_estadual" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => Fornecedor.Inscricao_estadual)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-12">
+                    <div class="form-group">
+                        <label>Inscrição Municipal</label>
+                        <InputNumber @bind-Value="@Fornecedor.Inscricao_municipal" class="form-control"></InputNumber>
+                        <ValidationMessage For="@(() => Fornecedor.Inscricao_municipal)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <input type="text" @bind="@Fornecedor.Endereco.Cep" @onblur="PesquisaCEP" class="form-control" id="cep"/>
+                        <ValidationMessage For="@(() => Fornecedor.Endereco.Cep)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Número</label>
+                        <InputNumber @bind-Value="@Fornecedor.Endereco.Numero" class="form-control"></InputNumber>
+                        <ValidationMessage For="@(() => Fornecedor.Endereco.Numero)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Rua</label>
+                        <input type="text" @bind="@Fornecedor.Endereco.Rua"  @ref="MyRua" class="form-control"/>
+                        <ValidationMessage For="@(() => Fornecedor.Endereco.Rua)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Bairro</label>
+                        <input type="text" @bind="@Fornecedor.Endereco.Bairro"  @ref="MyBairro" class="form-control"/>
+                        <ValidationMessage For="@(() => Fornecedor.Endereco.Bairro)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" @bind="@Fornecedor.Endereco.Cidade"  @ref="MyCidade" class="form-control"/>
+                        <ValidationMessage For="@(() => Fornecedor.Endereco.Cidade)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" @bind="@Fornecedor.Endereco.Estado"  @ref="MyEstado" class="form-control"/>
+                        <ValidationMessage For="@(() => Fornecedor.Endereco.Estado)"></ValidationMessage>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success ml-3">@ButtonText</button>
+                <a href="/fornecedores" class="btn btn-primary ml-2">Voltar</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code{
+    [Parameter] public Fornecedor Fornecedor { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    ElementReference MyRua, MyBairro, MyCidade, MyEstado;
+
+    HttpClient client = new HttpClient();
+
+    protected async void PesquisaCEP()
+    {
+
+        try
+        {
+            HttpResponseMessage response = await client.GetAsync("https://viacep.com.br/ws/" + Fornecedor.Endereco.Cep + "/json/");
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            PesquisaCEP cepParse = Newtonsoft.Json.JsonConvert.DeserializeObject<PesquisaCEP>(responseBody);
+
+            if (cepParse.logradouro != null)
+            {
+                Fornecedor.Endereco.Rua = cepParse.logradouro;
+                Fornecedor.Endereco.Bairro = cepParse.bairro;
+                Fornecedor.Endereco.Cidade = cepParse.localidade;
+                Fornecedor.Endereco.Estado = cepParse.uf;
+
+                await JSRuntime.InvokeVoidAsync("BlazorCEP.setCEP", MyRua, MyBairro, MyCidade, MyEstado, responseBody);
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "CEP inválido!");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            await JSRuntime.InvokeVoidAsync("alert", "CEP inválido!");
+
+        }
+    }
+}

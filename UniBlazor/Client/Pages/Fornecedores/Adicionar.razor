@@ -1,0 +1,40 @@
+﻿@page "/fornecedores/adicionar"
+@inject IFornecedorRepository fornecedorRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Adicionar Fornecedor</h3>
+
+<FormFornecedor Fornecedor="@fornecedor" ButtonText="Adicionar" OnValidSubmit="@AddFornecedor"></FormFornecedor>
+
+@code {
+    Fornecedor fornecedor = new Fornecedor();
+
+    async Task AddFornecedor()
+    {
+        Telefone telefone = new Telefone();
+        telefone.Telefones = fornecedor.Telefone.Telefones;
+
+        Endereco endereco = new Endereco();
+        endereco.Cep = fornecedor.Endereco.Cep;
+        endereco.Numero = fornecedor.Endereco.Numero;
+        endereco.Rua = fornecedor.Endereco.Rua;
+        endereco.Bairro = fornecedor.Endereco.Bairro;
+        endereco.Cidade = fornecedor.Endereco.Cidade;
+        endereco.Estado = fornecedor.Endereco.Estado;
+
+        fornecedor.Telefone_Id_telefone = telefone.Id_telefone;
+        fornecedor.Telefone = telefone;
+
+        fornecedor.Endereco_Id_Endereco = endereco.Id_endereco;
+        fornecedor.Endereco = endereco;
+
+        try
+        {
+            await fornecedorRepository.CreateFornecedor(fornecedor);
+        } catch (Exception ex)
+        {
+
+        }
+        navigation.NavigateTo("/fornecedores");
+    }
+}

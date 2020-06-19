@@ -1,0 +1,24 @@
+﻿@page "/cfop/adicionar"
+@inject HttpClient http
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Adicionar CFOP</h3>
+
+<FormCFOP Cfop="@cfop" ButtonText="Adicionar" OnValidSubmit="@AddCfop"></FormCFOP>
+
+@code {
+    CFOP cfop = new CFOP();
+
+    async Task AddCfop()
+    {
+        try
+        {
+            await http.PostAsJsonAsync("api/cfop", cfop);
+        }
+        catch (Exception ex)
+        {
+
+        }
+        navigation.NavigateTo("/cfop");
+    }
+}

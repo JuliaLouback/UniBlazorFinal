@@ -1,0 +1,92 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">Uni Construções</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+<AuthorizeView>
+    <Authorized>
+        <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+            <ul class="nav flex-column">
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-home" aria-hidden="true"></span> Home
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="vendas">
+                        <span class="oi oi-cart" aria-hidden="true"></span> Vendas
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="cotacao">
+                        <span class="oi oi-cart" aria-hidden="true"></span> Cotações
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="clientes">
+                        <span class="oi oi-person" aria-hidden="true"></span> Clientes
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="produtos">
+                        <span class="oi oi-box" aria-hidden="true"></span> Produtos
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="funcionarios">
+                        <span class="oi oi-people" aria-hidden="true"></span> Funcionários
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="fornecedores">
+                        <span class="oi oi-cog" aria-hidden="true"></span> Fornecedores
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="historico">
+                        <span class="oi oi-document" aria-hidden="true"></span> Hist. Produtos
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="historicostatus">
+                        <span class="oi oi-script" aria-hidden="true"></span> Hist. Status
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="historicosalario">
+                        <span class="oi oi-dollar" aria-hidden="true"></span> Hist. Salário
+                    </NavLink>
+                </li>
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="palito">
+                        <span class="oi oi-play-circle" aria-hidden="true"></span> Jogo do Palito
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+            <ul class="nav flex-column">
+                <li class="nav-item px-3">
+                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                        <span class="oi oi-account-login" aria-hidden="true"></span> Login
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+        @code {
+            private bool collapseNavMenu = true;
+
+            private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+            private void ToggleNavMenu()
+            {
+                collapseNavMenu = !collapseNavMenu;
+            }
+        }

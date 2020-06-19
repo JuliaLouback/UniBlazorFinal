@@ -1,0 +1,44 @@
+﻿@page "/produtos/adicionar"
+@inject IProdutoRepository produtoRepository
+@inject IHistoricoRepository historicoRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Adicionar Produto</h3>
+
+<FormProduto Produto="@produto" ButtonText="Adicionar" OnValidSubmit="@AddProduto"></FormProduto>
+
+@code {
+    Produto produto = new Produto();
+
+    async Task AddProduto()
+    {
+        DateTime localDate = DateTime.Now;
+
+        Historico historico = new Historico();
+        historico.Produto_Id_produto = produto.Id_produto;
+        historico.Valor = produto.Valor_unitario;
+        historico.Data_inicio = localDate;
+
+        try
+        {
+            await produtoRepository.CreateProduto(produto);
+
+        } catch(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+
+        try
+        {
+            await historicoRepository.CreateHistorico(historico);
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        navigation.NavigateTo("/produtos");
+    }
+}

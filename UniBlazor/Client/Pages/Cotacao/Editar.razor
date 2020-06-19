@@ -1,0 +1,79 @@
+﻿@page "/cotacao/editar/{id:int}"
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject IJSRuntime jsRuntime
+
+<h3 class="text-primary mb-4">Editar Cotação</h3>
+
+<FormCotacao Cotacao="@cotacaoProduto" ButtonText="Editar" OnValidSubmit="@EditCotacao"></FormCotacao>
+
+
+@code {
+
+    Cotacao cotacaoProduto = new Cotacao();
+
+
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+
+        cotacaoProduto = await http.GetFromJsonAsync<Cotacao>($"api/cotacaos/{id}");
+
+    }
+
+    async Task EditCotacao()
+    {
+        DateTime localDate = DateTime.Now;
+
+        Cotacao cotacao = new Cotacao();
+
+        cotacao.Id_cotacao = cotacaoProduto.Id_cotacao;
+        cotacao.Cliente_Cpf = cotacaoProduto.Cliente_Cpf;
+        cotacao.Data_venda = localDate;
+        cotacao.Funcionario_Cpf = cotacaoProduto.Funcionario_Cpf;
+
+        cotacao.Data_venda = localDate;
+
+        decimal total = 0;
+        foreach (CotacaoProduto cotacaoProduto1 in cotacaoProduto.CotacaoProdutos)
+        {
+            total = decimal.Add(total, cotacaoProduto1.Valor);
+        }
+        cotacao.Valor_total = total;
+
+        List<CotacaoProduto> lista = new List<CotacaoProduto>();
+        List<Produto> listaProd = new List<Produto>();
+
+        List<CotacaoProduto> listaProdutos = await http.GetFromJsonAsync<List<CotacaoProduto>>($"api/cotacaoproduto/{cotacaoProduto.Id_cotacao}");
+
+        foreach (CotacaoProduto cotacaoProduto2 in cotacaoProduto.CotacaoProdutos)
+        {
+            CotacaoProduto cotacaoP = new CotacaoProduto
+            {
+                Produto_Id_produto = cotacaoProduto2.Produto_Id_produto,
+                Quantidade = cotacaoProduto2.Quantidade,
+                Valor = cotacaoProduto2.Valor,
+                Valor_unitario = cotacaoProduto2.Valor_unitario,
+                Cotacao_Id_cotacao = cotacaoProduto.Id_cotacao
+            };
+
+            var produto = await http.GetFromJsonAsync<Produto>($"api/produto/{cotacaoProduto2.Produto_Id_produto}");
+            produto.Estoque_atual = produto.Estoque_atual - cotacaoProduto2.Quantidade;
+            await http.PostAsJsonAsync("api/cotacaoProduto", cotacaoP);
+            await http.PutAsJsonAsync("api/produto", produto);
+        }
+
+        foreach (CotacaoProduto cotacaoProduto2 in listaProdutos)
+        {
+            var produto = await http.GetFromJsonAsync<Produto>($"api/produto/{cotacaoProduto2.Produto_Id_produto}");
+            produto.Estoque_atual = produto.Estoque_atual + cotacaoProduto2.Quantidade;
+            await http.PutAsJsonAsync("api/produto", produto);
+            await http.DeleteAsync($"api/cotacaoProduto/{cotacaoProduto2.Id_vendaProduto}");
+        }
+
+        await http.PutAsJsonAsync("api/cotacaos", cotacao);
+
+        navigation.NavigateTo("/cotacao");
+    }
+}

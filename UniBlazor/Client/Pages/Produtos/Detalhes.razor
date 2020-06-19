@@ -1,0 +1,103 @@
+﻿@page "/produtos/detalhes/{id:int}"
+@inject IProdutoRepository produtoRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-2">Detalhes Produtos</h3>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Nome
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Nome
+        </dd>
+        <dt class="col-sm-2">
+            Unidade de Medida
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Unidade_medida
+        </dd>
+        <dt class="col-sm-2">
+            Valor Unitário
+        </dt>
+        <dd class="col-sm-10">
+            R$  @produto.Valor_unitario
+        </dd>
+        <dt class="col-sm-2">
+            Peso Bruto
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Peso_bruto
+        </dd>
+        <dt class="col-sm-2">
+            Peso Líquido
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Peso_liquido
+        </dd>
+        <dt class="col-sm-2">
+            Estoque Mínimo
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Estoque_minimo
+        </dd>
+        <dt class="col-sm-2">
+            Estoque Máximo
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Estoque_maximo
+        </dd>
+        <dt class="col-sm-2">
+            Estoque Atual
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Estoque_atual
+        </dd>
+        <dt class="col-sm-2">
+            Descrição
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Descricao
+        </dd>
+        <dt class="col-sm-2">
+            Fornecedor
+        </dt>
+        <dd class="col-sm-10">
+            @produto.Fornecedor_Cnpj
+        </dd>
+        <dt class="col-sm-2">
+            CFOP
+        </dt>
+        <dd class="col-sm-10">
+            @produto.CFOP_Codigo
+        </dd>
+        <dt class="col-sm-2">
+            CST
+        </dt>
+        <dd class="col-sm-10">
+            @produto.CST_Codigo
+        </dd>
+        <dt class="col-sm-2">
+            NCM
+        </dt>
+        <dd class="col-sm-10">
+            @produto.NCM_Codigo
+        </dd>
+    </dl>
+</div>
+<div>
+    <a href="/produtos/editar/@produto.Id_produto" class="btn btn-success">Editar</a>
+    <a href="/produtos" class="btn btn-primary">Voltar</a>
+</div>
+
+@code {
+    Produto produto = new Produto();
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        produto = await produtoRepository.GetProduto(id);
+    }
+}

@@ -1,0 +1,129 @@
+﻿@page "/historicosalario"
+@inject IHistoricoSalarioRepository historicoSalarioRepository
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary mb-4">Lista de Histórico de Salários</h3>
+<EditForm Model="@filterHistoricoSalario" OnValidSubmit="@Pesquisa">
+    <div class="row apagar">
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Data Inicial</label>
+                <InputDate @bind-Value="@filterHistoricoSalario.DataI" class="form-control"></InputDate>
+                <ValidationMessage For="@(() => filterHistoricoSalario.DataI)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Data Final</label>
+                <InputDate @bind-Value="@filterHistoricoSalario.DataF" class="form-control"></InputDate>
+                <ValidationMessage For="@(() => filterHistoricoSalario.DataF)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Cargo</label>
+                <InputSelect @bind-Value="@filterHistoricoSalario.Cargo" class="form-control">
+                    <option value=""></option>
+                    <option value="RH">RH</option>
+                    <option value="Vendedor">Vendedor</option>
+                    <option value="Gerente">Gerente</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => filterHistoricoSalario.Cargo)"></ValidationMessage>
+            </div>
+        </div>
+
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-outline-secondary mt-4">Pesquisar</button>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="button" class="btn btn-outline-primary mt-4" @onclick="Imprimir">Imprimir</button>
+        </div>
+    </div>
+</EditForm>
+
+<div>
+    @if (historicos == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (historicos.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div>
+    }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Data Início
+                    </th>
+                    <th>
+                        Data Final
+                    </th>
+                    <th>
+                        Funcionário
+                    </th>
+                    <th>
+                        Cargo
+                    </th>
+                    <th>
+                        Salário
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in historicos)
+                {
+                    <tr>
+                        <td>
+                            @item.Data_inicio
+                        </td>
+                        <td>
+                            @item.Data_final
+                        </td>
+                        <td>
+                            @item.Funcionario.Nome
+                        </td>
+                        <td>
+                            @item.Cargo
+                        </td>
+                        <td>
+                            R$ @item.Salario
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<HistoricoSalario> historicos;
+    FilterHistoricoSalario filterHistoricoSalario = new FilterHistoricoSalario();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        historicos = await historicoSalarioRepository.GetHistoricoSalario();
+    }
+
+    private async Task Pesquisa()
+    {
+        historicos = await historicoSalarioRepository.GetHistoricoSalarioFilter(filterHistoricoSalario);
+    }
+
+    private async Task Imprimir()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorImprimir.setImprimir");
+
+    }
+}
+
+

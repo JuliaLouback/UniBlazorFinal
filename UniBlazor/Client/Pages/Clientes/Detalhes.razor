@@ -1,0 +1,87 @@
+﻿@page "/clientes/detalhes/{id}"
+@inject IClienteRepository clienteRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-2">Detalhes Cliente</h3>
+
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Nome
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Nome
+        </dd>
+        <dt class="col-sm-2">
+            E-mail
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Email
+        </dd>
+
+        <dt class="col-sm-2">
+            Telefone
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Telefone.Telefones
+        </dd>
+        <dt class="col-sm-2">
+            CPF
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Cpf
+        </dd>
+        <dt class="col-sm-2">
+            CEP
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Endereco.Cep
+        </dd>
+        <dt class="col-sm-2">
+            Rua
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Endereco.Rua
+        </dd>
+        <dt class="col-sm-2">
+            Número
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Endereco.Numero
+        </dd>
+        <dt class="col-sm-2">
+            Bairro
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Endereco.Bairro
+        </dd>
+        <dt class="col-sm-2">
+            Cidade
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Endereco.Cidade
+        </dd>
+        <dt class="col-sm-2">
+            Estado
+        </dt>
+        <dd class="col-sm-10">
+            @cliente.Endereco.Estado
+        </dd>
+    </dl>
+</div>
+<div>
+    <a href="/clientes/editar/@cliente.Cpf" class="btn btn-success">Editar</a>
+    <a href="/clientes" class="btn btn-primary">Voltar</a>
+</div>
+
+@code { 
+    Cliente cliente = new Cliente();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cliente = await clienteRepository.GetCliente(id);
+    }
+}

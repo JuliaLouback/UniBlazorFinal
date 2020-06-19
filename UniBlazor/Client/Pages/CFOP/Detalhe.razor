@@ -1,0 +1,37 @@
+﻿@page "/cfop/detalhes/{id}"
+@inject HttpClient http
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-2">Detalhes CFOP</h3>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Código
+        </dt>
+        <dd class="col-sm-10">
+            @cfop.Codigo
+        </dd>
+        <dt class="col-sm-2">
+            Descrição
+        </dt>
+        <dd class="col-sm-10">
+            @cfop.Descricao
+        </dd>
+    </dl>
+</div>
+<div>
+    <a href="/cfop/editar/@cfop.Codigo" class="btn btn-success">Editar</a>
+    <a href="/cfop" class="btn btn-primary">Voltar</a>
+</div>
+
+@code {
+    CFOP cfop = new CFOP();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cfop = await http.GetFromJsonAsync<CFOP>($"api/cfop/{id}");
+    }
+}

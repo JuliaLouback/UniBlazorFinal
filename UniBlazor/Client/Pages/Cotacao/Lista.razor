@@ -1,0 +1,92 @@
+﻿@page "/cotacao"
+@inject HttpClient http
+
+<h3 class="text-primary mb-4">Lista de Cotações</h3>
+
+<div>
+    <a href="/cotacao/adicionar" class="btn btn-outline-success mb-4">Adicionar</a>
+</div>
+
+<div>
+    @if (cotacao == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (cotacao.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div> }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Cliente
+                    </th>
+                    <th>
+                        Funcionário
+                    </th>
+                    <th>
+                        Data da Cotação
+                    </th>
+                    <th>
+                        Valor
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in cotacao)
+                {
+                    <tr>
+                        <td>
+                            @item.Cliente.Nome
+                        </td>
+                        <td>
+                            @item.Funcionario.Nome
+                        </td>
+                        <td>
+                            @item.Data_venda.ToShortDateString()
+                        </td>
+                        <td>
+                            R$ @item.Valor_total
+                        </td>
+                        <td>
+                            <a href="/cotacao/editar/@item.Id_cotacao" class="btn btn-warning">Editar</a>
+                            <a href="/cotacao/detalhes/@item.Id_cotacao" class="btn btn-info">Detalhes</a>
+                            <button class="btn btn-danger" @onclick="@(() => ExcluirCotacao(item.Id_cotacao))">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<Cotacao> cotacao;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        cotacao = await http.GetFromJsonAsync<List<Cotacao>>("api/cotacaos");
+    }
+
+    private async Task ExcluirCotacao(int id)
+    {
+        await http.DeleteAsync($"api/cotacaos/{id}");
+        await LoadData();
+    }
+
+}
+
+
+

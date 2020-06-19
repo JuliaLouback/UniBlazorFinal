@@ -1,0 +1,81 @@
+﻿@page "/funcionarios/adicionar"
+@inject IFuncionarioRepository funcionarioRepository
+@inject IHistoricoSalarioRepository historicoSalarioRepository
+@inject IHistoricoStatusRepository historicoStatusRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mt-2">Adicionar Funcionário</h3>
+
+<FormFuncionario Funcionario="@funcionario" ButtonText="Adicionar" OnValidSubmit="@AddFuncionarios"></FormFuncionario>
+
+@code {
+
+    Funcionario funcionario = new Funcionario();
+
+    async Task AddFuncionarios()
+    {
+        Telefone telefone = new Telefone();
+        telefone.Telefones = funcionario.Telefone.Telefones;
+
+        Endereco endereco = new Endereco();
+        endereco.Cep = funcionario.Endereco.Cep;
+        endereco.Rua = funcionario.Endereco.Rua;
+        endereco.Numero = funcionario.Endereco.Numero;
+        endereco.Bairro = funcionario.Endereco.Bairro;
+        endereco.Cidade = funcionario.Endereco.Cidade;
+        endereco.Estado = funcionario.Endereco.Estado;
+
+        funcionario.Telefone_Id_telefone = telefone.Id_telefone;
+        funcionario.Telefone = telefone;
+
+
+        funcionario.Endereco_Id_endereco = endereco.Id_endereco;
+        funcionario.Endereco = endereco;
+
+        DateTime localDate = DateTime.Now;
+
+        HistoricoSalario historicoSalario = new HistoricoSalario();
+        historicoSalario.Data_inicio = localDate;
+        historicoSalario.Funcionario_Cpf = funcionario.Cpf;
+        historicoSalario.Salario = funcionario.Salario;
+        historicoSalario.Cargo = funcionario.Cargo;
+
+        HistoricoStatus historicoStatus = new HistoricoStatus();
+        historicoStatus.Data_inicio = localDate;
+        historicoStatus.Funcionario_Cpf = funcionario.Cpf;
+        historicoStatus.Status = funcionario.Status;
+
+        try
+        {
+            Console.WriteLine("Louback");
+            
+
+            await funcionarioRepository.CreateFuncionario(funcionario);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+
+        try
+        {
+            await historicoSalarioRepository.CreateHistoricoSalario(historicoSalario);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Julia");
+            Console.WriteLine(ex.Message);
+        }
+
+        try
+        {
+            await historicoStatusRepository.CreateHistoricoStatus(historicoStatus);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Julia");
+            Console.WriteLine(ex.Message);
+        }
+        navigation.NavigateTo("/funcionarios");
+    }
+}

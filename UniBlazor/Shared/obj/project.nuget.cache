@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "KquBBHtiUbVJF0M0CA228JUUbzr3zh9M5oqbEBNJz7GLVqYs08EH6h52GO9eGWg1aW2Tb1004JfhtasCx0zQCA==",
+  "success": true,
+  "projectFilePath": "D:\\FINAL\\UniBlazor\\UniBlazor\\Shared\\UniBlazor.Shared.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\julia\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512",
+    "C:\\Users\\julia\\.nuget\\packages\\system.componentmodel.annotations\\4.7.0\\system.componentmodel.annotations.4.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}

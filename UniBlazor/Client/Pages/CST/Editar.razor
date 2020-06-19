@@ -1,0 +1,23 @@
+﻿@page "/cst/editar/{id}"
+@inject ICstRepository cstRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Editar CST</h3>
+
+<FormCST Cst="@cst" ButtonText="Editar" OnValidSubmit="@EditCst"></FormCST>
+
+@code {
+    CST cst = new CST();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cst = await cstRepository.GetCST(id);
+    }
+
+    async Task EditCst()
+    {
+        await cstRepository.UpdateCst(cst);
+        navigation.NavigateTo("/cst");
+    }
+}

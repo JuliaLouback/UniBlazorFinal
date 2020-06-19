@@ -1,0 +1,134 @@
+﻿@inject IJSRuntime JSRuntime
+<div class="row">
+    <div class="col-md-10 col-sm-12">
+        <EditForm Model="@Cliente" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="row">
+
+
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Nome</label>
+                        <InputText @bind-Value="@Cliente.Nome" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => Cliente.Nome)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>E-mail</label>
+                        <InputText @bind-Value="@Cliente.Email" class="form-control"></InputText>
+                        <ValidationMessage For="@(() => Cliente.Email)"></ValidationMessage>
+                    </div>
+
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>CPF</label>
+                        <input @bind="@Cliente.Cpf" class="form-control" id="cpf"/>
+                        <ValidationMessage For="@(() => Cliente.Cpf)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Telefone</label>
+                        <input type="text" @bind="@Cliente.Telefone.Telefones" id="telefone" class="form-control"/>
+                        <ValidationMessage For="@(() => Cliente.Telefone.Telefones)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>CEP</label>
+                        <input type="text" @bind="@Cliente.Endereco.Cep" class="form-control" id="cep" @onblur="PesquisaCEP" />
+                        <ValidationMessage For="@(() => Cliente.Endereco.Cep)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-12">
+                    <div class="form-group">
+                        <label>Número</label>
+                        <InputNumber @bind-Value="@Cliente.Endereco.Numero" class="form-control"></InputNumber>
+                        <ValidationMessage For="@(() => Cliente.Endereco.Numero)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Rua</label>
+                        <input type="text" value="@Cliente.Endereco.Rua" @ref="MyRua" class="form-control" />
+                        <ValidationMessage For="@(() => Cliente.Endereco.Rua)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Bairro</label>
+                        <input type="text" @bind="@Cliente.Endereco.Bairro" class="form-control" @ref="MyBairro" />
+                        <ValidationMessage For="@(() => Cliente.Endereco.Bairro)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" @bind="@Cliente.Endereco.Cidade" class="form-control" @ref="MyCidade" />
+                        <ValidationMessage For="@(() => Cliente.Endereco.Cidade)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" @bind="@Cliente.Endereco.Estado" class="form-control" @ref="MyEstado" />
+                        <ValidationMessage For="@(() => Cliente.Endereco.Estado)"></ValidationMessage>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success ml-3">@ButtonText</button>
+                <a href="/Clientes" class="btn btn-primary ml-2">Voltar</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code{
+    [Parameter] public Cliente Cliente { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    ElementReference MyRua, MyBairro, MyCidade, MyEstado;
+
+    HttpClient client = new HttpClient();
+
+    protected async void PesquisaCEP()
+    {
+
+        try {
+            HttpResponseMessage response = await client.GetAsync("https://viacep.com.br/ws/" + Cliente.Endereco.Cep + "/json/");
+
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            PesquisaCEP cepParse = Newtonsoft.Json.JsonConvert.DeserializeObject<PesquisaCEP>(responseBody);
+
+            if (cepParse.logradouro != null)
+            {
+                Cliente.Endereco.Rua = cepParse.logradouro;
+                Cliente.Endereco.Bairro = cepParse.bairro;
+                Cliente.Endereco.Cidade = cepParse.localidade;
+                Cliente.Endereco.Estado = cepParse.uf;
+
+                await JSRuntime.InvokeVoidAsync("BlazorCEP.setCEP", MyRua, MyBairro, MyCidade, MyEstado, responseBody);
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "CEP inválido!");
+            }
+        }
+        catch(Exception e)
+        {
+            Console.WriteLine(e.Message);
+            await JSRuntime.InvokeVoidAsync("alert","CEP inválido!");
+
+        }
+    }
+
+}
+
+

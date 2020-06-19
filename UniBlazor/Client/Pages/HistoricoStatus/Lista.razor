@@ -1,0 +1,123 @@
+﻿@page "/historicostatus"
+@inject IHistoricoStatusRepository historicoStatusRepository
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary mb-4">Lista de Histórico de Status</h3>
+
+<EditForm Model="@filterHistoricoStatus" OnValidSubmit="@Pesquisa">
+    <div class="row apagar">
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Data Inicial</label>
+                <InputDate @bind-Value="@filterHistoricoStatus.DataI" class="form-control"></InputDate>
+                <ValidationMessage For="@(() => filterHistoricoStatus.DataI)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Data Final</label>
+                <InputDate @bind-Value="@filterHistoricoStatus.DataF" class="form-control"></InputDate>
+                <ValidationMessage For="@(() => filterHistoricoStatus.DataF)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <div class="form-group">
+                <label>Cargo</label>
+                <InputSelect @bind-Value="@filterHistoricoStatus.Status" class="form-control">
+                    <option value=""></option>
+                    <option value="Ativo">Ativo</option>
+                    <option value="Inativo">Inativo</option>
+                </InputSelect>
+                <ValidationMessage For="@(() => filterHistoricoStatus.Status)"></ValidationMessage>
+            </div>
+        </div>
+
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-outline-secondary mt-4">Pesquisar</button>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="button" class="btn btn-outline-primary mt-4" @onclick="Imprimir">Imprimir</button>
+        </div>
+    </div>
+</EditForm>
+
+<div>
+    @if (historicos == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (historicos.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div>
+    }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Data Início
+                    </th>
+                    <th>
+                        Data Final
+                    </th>
+                    <th>
+                        Funcionário
+                    </th>
+                    <th>
+                        Status
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in historicos)
+                {
+                    <tr>
+                        <td>
+                            @item.Data_inicio
+                        </td>
+                        <td>
+                            @item.Data_final
+                        </td>
+                        <td>
+                            @item.Funcionario.Nome
+                        </td>
+                        <td>
+                            @item.Status
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<HistoricoStatus> historicos;
+    FilterHistoricoStatus filterHistoricoStatus = new FilterHistoricoStatus();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        historicos = await historicoStatusRepository.GetHistoricoStatus();
+    }
+
+    private async Task Pesquisa()
+    {
+        historicos = await historicoStatusRepository.GetHistoricoStatusFilter(filterHistoricoStatus);
+    }
+
+    private async Task Imprimir()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorImprimir.setImprimir");
+
+    }
+}
+

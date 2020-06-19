@@ -1,0 +1,14 @@
+﻿@media print {
+    @page {
+        margin-left: 15mm;
+        margin-right: 15mm;
+    }
+
+    footer {
+        page-break-after: always;
+    }
+
+    .apagar {
+        display: none;
+    }
+}

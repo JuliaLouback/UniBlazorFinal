@@ -1,0 +1,80 @@
+﻿@page "/ncm"
+@inject HttpClient http
+
+
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary mb-4">Lista de NCM</h3>
+
+<div>
+    <a href="/ncm/adicionar" class="btn btn-outline-success mb-4">Adicionar</a>
+</div>
+
+<div>
+    @if (ncm == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (ncm.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div> }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Código
+                    </th>
+                    <th>
+                        Descrição
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in ncm)
+                {
+                    <tr>
+                        <td>
+                            @item.Codigo
+                        </td>
+                        <td>
+                            @item.NomeResumido
+                        </td>
+                        <td>
+                            <a href="/ncm/editar/@item.Codigo" class="btn btn-warning">Editar</a>
+                            <a href="/ncm/detalhes/@item.Codigo" class="btn btn-info">Detalhes</a>
+                            <button class="btn btn-danger" @onclick="@(() => ExcluirNcm(item.Codigo))">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<NCM> ncm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        ncm = await http.GetFromJsonAsync<List<NCM>>("api/ncm");
+    }
+
+    private async Task ExcluirNcm(long id)
+    {
+        await http.DeleteAsync($"api/ncm/{id}");
+        await LoadData();
+    }
+
+}

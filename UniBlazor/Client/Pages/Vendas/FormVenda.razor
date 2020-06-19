@@ -1,0 +1,207 @@
+﻿@inject HttpClient http
+@inject IJSRuntime JSRuntime
+<div class="row pb-5">
+    <div class="col-md-10 col-sm-12">
+        <EditForm Model="@Venda" OnValidSubmit="OnValidSubmit">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+            <div class="row">
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Cliente</label>
+                        <select @bind="@Venda.Cliente_Cpf" class="form-control" @onclick="SelectCliente" @ref="MyCliente">
+                            @if (Venda.Id_venda == 0)
+                            {
+                                <option value=""></option>
+                            }
+
+                            @foreach (var cliente in Clientes)
+                            {
+                                if (Venda.Cliente_Cpf == cliente.Cpf)
+                                {
+                                    <option value="@cliente.Cpf" selected="selected">@cliente.Nome</option>
+                                }
+                                else
+                                {
+                                    <option value="@cliente.Cpf">@cliente.Nome</option>
+                                }
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => Venda.Cliente_Cpf)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-6 col-sm-12">
+                    <div class="form-group">
+                        <label>Funcionários</label>
+                        <select @bind="@Venda.Funcionario_Cpf" class="form-control" @onclick="SelectFuncionario" @ref="MyFuncionario">
+                            @if (Venda.Id_venda == 0)
+                            {
+                                <option value=""></option>
+                            }
+
+                            @foreach (var funcionario in Funcionarios)
+                            {
+                                if (Venda.Funcionario_Cpf == funcionario.Cpf)
+                                {
+                                    <option value="@funcionario.Cpf" selected="selected">@funcionario.Nome</option>
+                                }
+                                else
+                                {
+                                    <option value="@funcionario.Cpf">@funcionario.Nome</option>
+                                }
+                            }
+                        </select>
+                        <ValidationMessage For="@(() => Venda.Funcionario_Cpf)"></ValidationMessage>
+                    </div>
+                </div>
+                <div class="col-md-12 col-sm-12 @visao">
+                    <div class="alert alert-danger" role="alert">
+                        Esse produto já está na lista!
+                    </div>
+                </div>
+                <div class="col-md-12 col-sm-12">
+                    <AddProduto AddProdutoView="@addProdutoView" ButtonText="Adicionar" OnValidSubmit="@AddProdutos"></AddProduto>
+                </div>
+                <button type="submit" class="btn btn-success ml-3">@ButtonText</button>
+                <a href="/Vendas" class="btn btn-primary ml-2">Voltar</a>
+            </div>
+        </EditForm>
+    </div>
+</div>
+<h4>Produtos </h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                Nome
+            </th>
+            <th>
+                Quantidade
+            </th>
+            <th>
+                Valor Unitário
+            </th>
+            <th>
+                Total
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (listaProdutos != null || listaProdutos.Count > 0)
+        {
+            foreach (VendaProduto produto in listaProdutos)
+            {
+                <tr>
+                    <td>
+                        @produto.Produto.Nome
+                    </td>
+                    <td>
+                        @produto.Quantidade
+                    </td>
+                    <td>
+                        R$ @produto.Valor_unitario
+                    </td>
+                    <td>
+                        R$ @produto.Valor
+                    </td>
+                    <td>
+                        <button class="btn btn-danger" @onclick="@(() => ExcluirProduto(produto.Produto_Id_produto))">Excluir</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@code{
+    [Parameter] public Venda Venda { get; set; }
+
+    [Parameter] public string ButtonText { get; set; }
+
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+
+    AddProdutoView addProdutoView = new AddProdutoView();
+
+    List<VendaProduto> listaProdutos = new List<VendaProduto>();
+
+    List<Cliente> Clientes = new List<Cliente>();
+
+    List<Funcionario> Funcionarios = new List<Funcionario>();
+
+    private string visao = "d-none";
+
+    ElementReference MyCliente;
+    ElementReference MyFuncionario;
+
+    async Task AddProdutos()
+    {
+        var pesquisa = listaProdutos.Exists(x => x.Produto.Id_produto == addProdutoView.ProductId);
+        if (pesquisa)
+        {
+            visao = "d-block";
+        }
+        else
+        {
+            var historico = await http.GetFromJsonAsync<List<Historico>>("api/historico");
+            var pesquisas = historico.Where(x => x.Id_historico == addProdutoView.Id_historico).FirstOrDefault();
+
+            VendaProduto venda = new VendaProduto();
+            var produto = await http.GetFromJsonAsync<Produto>($"api/produto/{addProdutoView.ProductId}");
+            venda.Produto = produto;
+            venda.Produto_Id_produto = addProdutoView.ProductId;
+            venda.Quantidade = Convert.ToInt32(addProdutoView.Quantity);
+            venda.Valor_unitario = pesquisas.Valor;
+            venda.Valor = decimal.Multiply(Convert.ToDecimal(pesquisas.Valor), Convert.ToDecimal(addProdutoView.Quantity));
+
+            listaProdutos.Add(venda);
+
+            Venda.VendaProdutos = listaProdutos;
+
+            addProdutoView.ProductId = 0;
+            addProdutoView.Quantity = 0;
+            visao = "d-none";
+        }
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Venda.Id_venda != 0)
+        {
+            listaProdutos = await http.GetFromJsonAsync<List<VendaProduto>>($"api/vendaproduto/{Venda.Id_venda}");
+            Venda.VendaProdutos = listaProdutos;
+        }
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        Clientes = await http.GetFromJsonAsync<List<Cliente>>("api/cliente");
+        Funcionarios = await http.GetFromJsonAsync<List<Funcionario>>("api/funcionario");
+
+    }
+
+    private void ExcluirProduto(int id)
+    {
+        listaProdutos.RemoveAll(x => x.Produto_Id_produto == id);
+        Venda.VendaProdutos = listaProdutos;
+    }
+
+
+    protected async void SelectCliente()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorUni.setSelectCliente", MyCliente);
+    }
+
+    protected async void SelectFuncionario()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorUni.setSelectFuncionario", MyFuncionario);
+    }
+
+}

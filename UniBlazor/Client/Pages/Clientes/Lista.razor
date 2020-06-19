@@ -1,0 +1,155 @@
+﻿@page "/clientes"
+@inject IClienteRepository clienteRepository
+@inject ITelefoneRepository telefoneRepository
+@inject IEnderecoRepository enderecoRepository
+@inject IJSRuntime JSRuntime
+
+
+<h3 class="text-primary mb-4">Lista de Clientes</h3>
+
+<div>
+    <a href="/clientes/adicionar" class="btn btn-outline-success mb-4 apagar">Adicionar</a>
+</div>
+<EditForm Model="@filterCliente" OnValidSubmit="@Pesquisa">
+    <div class="row apagar">
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Nome</label>
+                <InputText @bind-Value="@filterCliente.Nome" class="form-control"></InputText>
+                <ValidationMessage For="@(() => filterCliente.Nome)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>CPF</label>
+                <InputText @bind-Value="@filterCliente.Cpf" class="form-control" id="cpf"></InputText>
+                <ValidationMessage For="@(() => filterCliente.Cpf)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-outline-secondary mt-4">Pesquisar</button>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="button" class="btn btn-outline-primary mt-4" @onclick="Imprimir">Imprimir</button>
+        </div>
+    </div>
+</EditForm>
+
+<div class="alert alert-danger alert-dismissible" role="alert" style="display:none" @ref="MyAlert">
+    O cliente <strong>não</strong> pode ser excluído pois esta vinculado a uma ou mais Vendas e/ou Cotações!
+</div>
+
+
+<div>
+    @if (clientes == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (clientes.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div> }
+    else
+    {
+        <table class="table table-responsive-sm table-striped mt-2">
+            <thead>
+                <tr>
+                    <th>
+                        Nome
+                    </th>
+                    <th>
+                        E-mail
+                    </th>
+                    <th>
+                        CPF
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in clientes)
+                {
+                    <tr>
+                        <td>
+                            @item.Nome
+                        </td>
+                        <td>
+                            @item.Email
+                        </td>
+                        <td>
+                            @item.Cpf
+                        </td>
+                        <td class="apagar">
+                            <a href="/clientes/editar/@item.Cpf" class="btn btn-warning">Editar</a>
+                            <a href="/clientes/detalhes/@item.Cpf" class="btn btn-info">Detalhes</a>
+                            <button class="btn btn-danger" @onclick="@(() => ExcluirCliente(item.Cpf))">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    List<Cliente> clientes;
+    FilterCliente filterCliente = new FilterCliente();
+    ElementReference MyAlert;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            clientes = await clienteRepository.GetCliente();
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private async Task ExcluirCliente(string id)
+    {
+        Cliente cliente = await clienteRepository.GetCliente(id);
+
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisaoB", MyAlert);
+
+            await telefoneRepository.DeleteTelefone(cliente.Telefone_Id_telefone);
+            await enderecoRepository.DeleteEndereco(cliente.Endereco_Id_Endereco);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisao", MyAlert);
+
+        }
+
+        await LoadData();
+    }
+
+    private async Task Pesquisa()
+    {
+        clientes = await clienteRepository.GetClienteFilter(filterCliente);
+    }
+
+    private async Task Imprimir()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorImprimir.setImprimir");
+
+    }
+}
+
+
+

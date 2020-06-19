@@ -1,0 +1,9 @@
+D:\FINAL\UniBlazor\UniBlazor\Shared\obj\Debug\netstandard2.1\UniBlazor.Shared.csprojAssemblyReference.cache
+D:\FINAL\UniBlazor\UniBlazor\Shared\obj\Debug\netstandard2.1\UniBlazor.Shared.AssemblyInfoInputs.cache
+D:\FINAL\UniBlazor\UniBlazor\Shared\obj\Debug\netstandard2.1\UniBlazor.Shared.AssemblyInfo.cs
+D:\FINAL\UniBlazor\UniBlazor\Shared\bin\Debug\netstandard2.1\UniBlazor.Shared.deps.json
+D:\FINAL\UniBlazor\UniBlazor\Shared\bin\Debug\netstandard2.1\UniBlazor.Shared.dll
+D:\FINAL\UniBlazor\UniBlazor\Shared\bin\Debug\netstandard2.1\UniBlazor.Shared.pdb
+D:\FINAL\UniBlazor\UniBlazor\Shared\obj\Debug\netstandard2.1\UniBlazor.Shared.dll
+D:\FINAL\UniBlazor\UniBlazor\Shared\obj\Debug\netstandard2.1\UniBlazor.Shared.pdb
+D:\FINAL\UniBlazor\UniBlazor\Shared\obj\Debug\netstandard2.1\UniBlazor.Shared.csproj.CoreCompileInputs.cache

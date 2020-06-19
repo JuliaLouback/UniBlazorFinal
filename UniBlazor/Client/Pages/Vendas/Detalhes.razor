@@ -1,0 +1,96 @@
+﻿@page "/vendas/detalhes/{id:int}"
+@inject HttpClient http
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-2">Detalhes Venda</h3>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Cliente
+        </dt>
+        <dd class="col-sm-10">
+            @venda.Cliente_Cpf
+        </dd>
+        <dt class="col-sm-2">
+            Funcionário
+        </dt>
+        <dd class="col-sm-10">
+            @venda.Funcionario_Cpf
+        </dd>
+        <dt class="col-sm-2">
+            Data da Venda
+        </dt>
+        <dd class="col-sm-10">
+            @venda.Data_venda
+        </dd>
+        <dt class="col-sm-2">
+            Valor Total
+        </dt>
+        <dd class="col-sm-10">
+            @venda.Valor_total
+        </dd>
+    </dl>
+</div>
+<h4>Produtos </h4>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                Nome
+            </th>
+            <th>
+                Quantidade
+            </th>
+            <th>
+                Valor Unitário
+            </th>
+            <th>
+                Total
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (listaProdutos != null || listaProdutos.Count > 0)
+        {
+            foreach (VendaProduto produto in listaProdutos)
+            {
+                <tr>
+                    <td>
+                        @produto.Produto.Nome
+                    </td>
+                    <td>
+                        @produto.Quantidade
+                    </td>
+                    <td>
+                        R$ @produto.Valor_unitario
+                    </td>
+                    <td>
+                        R$ @produto.Valor
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+<div>
+    <a href="/vendas/editar/@venda.Id_venda" class="btn btn-success">Editar</a>
+    <a href="/vendas" class="btn btn-primary">Voltar</a>
+</div>
+
+@code {
+    Venda venda = new Venda();
+    List<VendaProduto> listaProdutos = new List<VendaProduto>();
+
+    [Parameter] public int id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        venda = await http.GetFromJsonAsync<Venda>($"api/venda/{id}");
+        
+        listaProdutos = await http.GetFromJsonAsync<List<VendaProduto>>($"api/vendaproduto/{venda.Id_venda}");
+       
+    }
+}
+

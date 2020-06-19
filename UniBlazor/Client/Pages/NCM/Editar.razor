@@ -1,0 +1,23 @@
+﻿@page "/ncm/editar/{id}"
+@inject HttpClient http
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-4">Editar NCM</h3>
+
+<FormNCM Ncm="@ncm" ButtonText="Editar" OnValidSubmit="@EditNcm"></FormNCM>
+
+@code {
+    NCM ncm = new NCM();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        ncm = await http.GetFromJsonAsync<NCM>($"api/ncm/{id}");
+    }
+
+    async Task EditNcm()
+    {
+        await http.PutAsJsonAsync("api/ncm", ncm);
+        navigation.NavigateTo("/ncm");
+    }
+}

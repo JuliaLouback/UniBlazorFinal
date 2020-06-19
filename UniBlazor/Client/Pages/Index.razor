@@ -1,0 +1,156 @@
+﻿@page "/"
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<div class="text-center">
+    <h1 class="display-5 mb-5 mt-2 text-primary">Uni Construções</h1>
+</div>
+
+@if (mostrar)
+{
+
+<div class="row mt-3">
+    <div class="col-lg-2 col-md-6 col-sm-12">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Vendas</h4>
+                <img src="https://image.flaticon.com/icons/svg/454/454637.svg" width="150" />
+                <a href="/vendas" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Cotações</h4>
+                <img src="https://image.flaticon.com/icons/svg/1250/1250673.svg" width="150" />
+                <a href="/cotacao" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Clientes</h4>
+                <img src="https://image.flaticon.com/icons/svg/912/912318.svg" />
+                <a href="/clientes" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Produtos</h4>
+                <img src="https://image.flaticon.com/icons/svg/1524/1524539.svg" width="150" />
+                <a href="/produtos" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Funcionários</h4>
+                <img src="https://image.flaticon.com/icons/svg/1670/1670353.svg" width="150" />
+                <a href="/funcionarios" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Fornecedores</h4>
+                <img src="https://image.flaticon.com/icons/svg/411/411760.svg" />
+                <a href="/fornecedores" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12 mt-lg-3">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Hist. Produto</h4>
+                <img src="https://image.flaticon.com/icons/svg/648/648256.svg" width="150" />
+                <a href="/historico" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12 mt-lg-3">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Hist. Status</h4>
+                <img src="https://image.flaticon.com/icons/svg/1006/1006596.svg" width="150" />
+                <a href="/historicostatus" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12 mt-3">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">Hist. Salários</h4>
+                <img src="https://image.flaticon.com/icons/svg/1006/1006596.svg" width="150" />
+                <a href="/historicosalario" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12 mt-3">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">CFOP</h4>
+                <img src="https://image.flaticon.com/icons/svg/2170/2170919.svg" width="150" class="p-2" />
+                <a href="/cfop" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12 mt-3">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">CST</h4>
+                <img src="https://image.flaticon.com/icons/svg/522/522575.svg" width="150" class="p-2" />
+                <a href="/cst" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-2 col-md-6 col-sm-12 mt-3">
+        <div class="card border border-primary" style="width: 12rem;">
+            <div class="card-body">
+                <h4 class="card-title text-primary">NCM</h4>
+                <img src="https://image.flaticon.com/icons/svg/808/808730.svg" width="150" class="p-2" />
+                <a href="/ncm" class="btn btn-outline-primary">Saiba mais</a>
+            </div>
+        </div>
+    </div>
+</div>
+}
+else
+{
+    <div class="col-sm-12">
+        <div class="jumbotron jumbotron-fluid">
+            <div class="container">
+                <h1 class="display-4">A melhor loja de Materias de Construção!</h1>
+                <p class="lead">A mais de 20 anos no mercado.</p>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool mostrar;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            // Since the user is a ClaimsPrincipal, you can also enumerate claims,
+            // evaluate membership in roles, etc.
+            mostrar = true;
+            Console.WriteLine($"Hello, {user.Identity.Name}!");
+        }
+        else
+        {
+            mostrar = false;
+            Console.WriteLine("You're not logged in.");
+        }
+    }
+}
+

@@ -1,0 +1,37 @@
+﻿@page "/cst/detalhes/{id}"
+@inject ICstRepository cstRepository
+@inject NavigationManager navigation
+
+<h3 class="text-primary mb-2">Detalhes CST</h3>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            Código
+        </dt>
+        <dd class="col-sm-10">
+            @cst.Codigo
+        </dd>
+        <dt class="col-sm-2">
+            Descrição
+        </dt>
+        <dd class="col-sm-10">
+            @cst.Descricao
+        </dd>
+    </dl>
+</div>
+<div>
+    <a href="/cst/editar/@cst.Codigo" class="btn btn-success">Editar</a>
+    <a href="/cst" class="btn btn-primary">Voltar</a>
+</div>
+
+@code {
+    CST cst = new CST();
+    [Parameter] public string id { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        cst = await cstRepository.GetCST(id);
+    }
+}

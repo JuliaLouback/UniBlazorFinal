@@ -1,0 +1,155 @@
+﻿@page "/produtos"
+@inject IProdutoRepository produtoRepository
+@inject IHistoricoRepository historicoRepository
+@inject HttpClient http
+
+@inject IJSRuntime JSRuntime
+
+<h3 class="text-primary mb-4">Lista de Produtos</h3>
+
+<div>
+    <a href="/produtos/adicionar" class="btn btn-outline-success mb-4">Adicionar</a>
+</div>
+
+<EditForm Model="@filterProduto" OnValidSubmit="@Pesquisa">
+    <div class="row apagar">
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Nome</label>
+                <InputText @bind-Value="@filterProduto.Nome" class="form-control"></InputText>
+                <ValidationMessage For="@(() => filterProduto.Nome)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="form-group">
+                <label>Descrição</label>
+                <InputText @bind-Value="@filterProduto.Descricao" class="form-control"></InputText>
+                <ValidationMessage For="@(() => filterProduto.Descricao)"></ValidationMessage>
+            </div>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="submit" class="btn btn-outline-secondary mt-4">Pesquisar</button>
+        </div>
+        <div class="col-md-1 col-sm-12 mt-1">
+            <button type="button" class="btn btn-outline-primary mt-4" @onclick="Imprimir">Imprimir</button>
+        </div>
+    </div>
+</EditForm>
+
+<div class="alert alert-danger alert-dismissible" role="alert" style="display:none" @ref="MyAlert">
+    O produto <strong>não</strong> pode ser excluído pois esta vinculado a uma ou mais Vendas e/ou Cotações!
+</div>
+
+<div>
+    @if (produtos == null)
+    {
+        <div class="alert alert-primary" role="alert">
+            Carregando...
+        </div> }
+    else if (produtos.Count == 0)
+    {
+        <div class="alert alert-danger" role="alert">
+            Não existem dados cadastrados nessa tabela!
+        </div> }
+    else
+    {
+        <table class="table table-responsive-sm table-striped">
+            <thead>
+                <tr>
+                    <th>
+                        Código
+                    </th>
+                    <th>
+                        Nome
+                    </th>
+                    <th>
+                        Valor Unitário
+                    </th>
+                    <th>
+                        Unidade de Medida
+                    </th>
+                    <th>
+                        Fornecedor
+                    </th>
+                    <th>
+
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in produtos)
+                {
+                    <tr>
+                        <td>
+                            @item.Id_produto
+                        </td>
+                        <td>
+                            @item.NomeResumido
+                        </td>
+                        <td>
+                            R$ @item.Valor_unitario
+                        </td>
+                        <td>
+                            @item.Unidade_medida
+                        </td>
+                        <td>
+                            @item.Fornecedor.NomeResumido
+                        </td>
+                        <td class="apagar">
+                            <a href="/produtos/editar/@item.Id_produto" class="btn btn-warning">Editar</a>
+                            <a href="/produtos/detalhes/@item.Id_produto" class="btn btn-info">Detalhes</a>
+                            <button class="btn btn-danger" @onclick="@(() => ExcluirProduto(item.Id_produto))">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>}
+</div>
+
+@code {
+    List<Produto> produtos;
+    ElementReference MyAlert;
+    FilterProduto filterProduto = new FilterProduto();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        produtos = await produtoRepository.GetProduto();
+    }
+
+    private async Task ExcluirProduto(int id)
+    {
+        try
+        {
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisaoB", MyAlert);
+
+            await historicoRepository.DeleteHistorico(id);
+            await produtoRepository.DeleteProduto(id);
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            await JSRuntime.InvokeVoidAsync("BlazorVisao.setVisao", MyAlert);
+
+        }
+    }
+
+    private async Task Pesquisa()
+    {
+        produtos = await produtoRepository.GetProdutoFilter(filterProduto);
+    }
+
+    private async Task Imprimir()
+    {
+        await JSRuntime.InvokeVoidAsync("BlazorImprimir.setImprimir");
+
+    }
+
+}
+
+

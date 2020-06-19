@@ -1,0 +1,57 @@
+﻿@page "/cotacao/adicionar"
+@inject HttpClient http
+@inject NavigationManager navigation
+@inject IJSRuntime jsRuntime
+
+<h3 class="text-primary mb-4">Adicionar Cotação</h3>
+
+<FormCotacao Cotacao="@cotacaoProduto" ButtonText="Adicionar" OnValidSubmit="@AddCotacao"></FormCotacao>
+
+@code {
+    Cotacao cotacaoProduto = new Cotacao();
+
+    async Task AddCotacao()
+    {
+        DateTime localDate = DateTime.Now;
+
+        Cotacao cotacao = new Cotacao();
+
+        cotacao.Cliente_Cpf = cotacaoProduto.Cliente_Cpf;
+        cotacao.Data_venda = localDate;
+        cotacao.Funcionario_Cpf = cotacaoProduto.Funcionario_Cpf;
+
+        decimal total = 0;
+        foreach (CotacaoProduto cotacaoProduto1 in cotacaoProduto.CotacaoProdutos)
+        {
+            total = decimal.Add(total, cotacaoProduto1.Valor);
+        }
+        cotacao.Valor_total = total;
+
+        var response = await http.PostAsJsonAsync("api/cotacaos", cotacao);
+        var result = await response.Content.ReadAsStringAsync();
+
+        var cotacaozinha = await http.GetFromJsonAsync<Cotacao>($"api/cotacaos/{Convert.ToInt32(result)}");
+
+        List<CotacaoProduto> lista = new List<CotacaoProduto>();
+        List<Produto> listaProd = new List<Produto>();
+
+        foreach (CotacaoProduto cotacaoProduto2 in cotacaoProduto.CotacaoProdutos)
+        {
+            CotacaoProduto cotacaoP = new CotacaoProduto
+            {
+                Produto_Id_produto = cotacaoProduto2.Produto_Id_produto,
+                Quantidade = cotacaoProduto2.Quantidade,
+                Valor = cotacaoProduto2.Valor,
+                Valor_unitario = cotacaoProduto2.Valor_unitario,
+                Cotacao_Id_cotacao = cotacaozinha.Id_cotacao
+            };
+
+            var produto = await http.GetFromJsonAsync<Produto>($"api/produto/{cotacaoProduto2.Produto_Id_produto}");
+            produto.Estoque_atual = produto.Estoque_atual - cotacaoProduto2.Quantidade;
+            await http.PostAsJsonAsync("api/cotacaoProduto", cotacaoP);
+            await http.PutAsJsonAsync("api/produto", produto);
+        }
+
+        navigation.NavigateTo("/cotacao");
+    }
+}
